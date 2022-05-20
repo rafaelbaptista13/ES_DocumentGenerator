@@ -16,19 +16,38 @@ const server = require("http").createServer(app)
 
 const port = process.env.PORT || 4000;
 
-/*
-require("./app/routes/user.routes.js")(app);
-require("./app/routes/ban.routes.js")(app);
-require("./app/routes/game.routes.js")(app);
-require("./app/routes/gamematch.routes.js")(app);
-require("./app/routes/userranks.routes.js")(app);
-require("./app/routes/ban.routes.js")(app);
-require("./app/routes/tournament.routes.js")(app);
-require("./app/routes/tournamentmatches.routes.js")(app);
-require("./app/routes/tournamentusers.routes.js")(app);
-require("./app/routes/friend.routes.js")(app);
-require("./app/routes/notification.routes.js")(app);
-require("./app/routes/report.routes.js")(app);
-*/
+
+/////
+// Start Swagger Configuration Section
+/////
+
+const swaggerJsDoc = require("swagger-jsdoc")
+const swaggerUi = require("swagger-ui-express")
+
+const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      title: "MathGames API",
+      description: "MathGames Server REST API",
+      contact: {
+        name: "MathGames"
+      },
+      servers: ["http://localhost:4000"]
+    }
+  },
+  apis: ["app/routes/*.js"]
+}
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions)
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+
+/////
+// End Swagger Configuration Section
+/////
+
+
+
+
+require("./app/routes/templates.routes.js")(app);
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
