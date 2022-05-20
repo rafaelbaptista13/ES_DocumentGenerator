@@ -2,6 +2,7 @@ import { React, useState } from 'react';
 import { Form } from 'react-bootstrap';
 
 
+import TemplateService from '../Services/template.service';
 
 
 function Upload (){
@@ -12,6 +13,8 @@ function Upload (){
         e.preventDefault();
         console.log("entrei")
         console.log(file)
+
+        TemplateService.upload_template(file);
     }
 
     return (
@@ -22,7 +25,7 @@ function Upload (){
                 <Form.Group controlId="formFile" className="mb-3">
                     <Form.Label>Upload a document template</Form.Label>
                     <Form.Control type="file" 
-                        onChange={e => setFile(e.target.value )}
+                        onChange={e => setFile(e.target.files[0] )}
                         />
                     
                     <button
