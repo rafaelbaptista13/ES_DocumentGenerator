@@ -5,7 +5,8 @@ const upload = multer();
 module.exports = app => {
     const templates = require("../controllers/template.controller.js");
     var router = require("express").Router();
-  
+    
+    /*
     /**
      * @swagger
      * /api/templates/upload:
@@ -17,6 +18,7 @@ module.exports = app => {
      *      '500':
      *         description: An internal error has occoured
      */
+    
     router.post("/upload", upload.single('file'), templates.upload);
   
     app.use('/api/templates', router);
