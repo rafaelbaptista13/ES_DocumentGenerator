@@ -16,7 +16,7 @@ const server = require("http").createServer(app)
 
 const port = process.env.PORT || 4000;
 
-/*
+
 /////
 // Start Swagger Configuration Section
 /////
@@ -44,7 +44,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 /////
 // End Swagger Configuration Section
 /////
-*/
 
 
 

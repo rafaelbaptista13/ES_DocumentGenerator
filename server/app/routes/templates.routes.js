@@ -5,8 +5,7 @@ const upload = multer();
 module.exports = app => {
     const templates = require("../controllers/template.controller.js");
     var router = require("express").Router();
-    
-    /*
+  
     /**
      * @swagger
      * /api/templates/upload:
