@@ -1,0 +1,10 @@
+{
+    "name_tag": {
+        "type": "string",
+        "value": "Testing HTML Field"
+    },
+    "html_field": {
+        "type": "html",
+        "value": "<h2><span style='color: #99ccff;'>Use O2M as M2M relationship for Edit UI Action</span></h2> <p><br /></p> <p>For the following scenario:</p> <ul style='list-style-position: inside;'><li>Table A</li><li>Table B</li><li>Table C</li></ul> <p>Table B has a reference to Table A and to Table C. Table B is a related list on the Table A form.<br /></p> <p><br /></p> <p>If you want to relate records from Table C to Table A, making Table B behave like a M2M (when using the &#34;Edit&#34; button on the related list), the OOTB &#34;Edit...&#34; (action name &#34;sysverb_edit_om2&#34;) UI Action needs to be overridden.</p> <p><br /></p> <p>The condition of the new UI Action should be:</p> <pre class='language-javascript'><code>(new GlideRecord(current.getTableName())).canWrite() &amp;&amp; RP.isRelatedList() &amp;&amp; !RP.getListControl().isOmitEditButton()</code></pre> <p><br /></p> <p>The script should contain the following:</p> <pre class='language-javascript'><code>var uri &#61; action.getGlideURI(); var path &#61; uri.getFileFromPath(); uri.set(&#39;sysparm_m2m_ref&#39;, current.getTableName()); uri.set(&#39;sysparm_stack&#39;, &#39;no&#39;); uri.set(&#39;sysparm_query&#39;, &#39;&#39;); uri.set(&#39;sysparm_collection_related_field&#39;, &#39;&lt;field on table B that references table C&gt;&#39;); uri.set(&#39;sysparm_collection_related_file&#39;, &#39;&lt;table C name&gt;&#39;); action.setRedirectURL(uri.toString(&#39;sys_m2m_template.do&#39;));</code></pre>"
+    }
+}
