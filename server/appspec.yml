@@ -21,3 +21,8 @@ hooks:
     - location: scripts/after_install.sh
       timeout: 900
       runas: root
+
+  ApplicationStart:
+    - location: scripts/app_start.sh
+      timeout: 900
+      runas: root
