@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bodyParser = require("body-parser");
 const cors = require('cors')
 const express = require("express");
@@ -44,7 +45,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 /////
 // End Swagger Configuration Section
 /////
-
 
 
 require("./app/routes/templates.routes.js")(app);

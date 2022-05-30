@@ -1,8 +1,8 @@
+const s3 = require("../config/bucketconfig");
+const fs = require("fs");
 
 // Upload Template
 exports.upload = (req, res) => {
-
-    console.log(req.file)
     
     /* Validate request section */
     if (req.file == undefined) {
@@ -27,10 +27,29 @@ exports.upload = (req, res) => {
     }
     /* End validate request section */
 
-
-    res.status(200).send({
-        message: "Template upload with sucess!"
-    });
+    const fileContent = fs.readFileSync(req.file.path)
     
+    const params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: filename,
+        Body: fileContent
+    }
+
+
+    s3.upload(params, (err, data) => {
+        if (err) {
+            console.log("Erro no upload: ", err)
+
+            res.status(500).send({
+                message: "An error occurred while uploading the template!"
+            });
+        }
+            console.log("Sucesso no upload.")
+
+            res.status(201).send({
+                message: "Template upload with sucess!"
+            });
+        })
+
   };
   
