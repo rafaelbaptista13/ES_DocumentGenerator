@@ -4,6 +4,8 @@ const fs = require("fs");
 // Upload Template
 exports.upload = (req, res) => {
     
+    console.log("TOu upload")
+    console.log(process.env.AWS_BUCKET_NAME);
     /* Validate request section */
     if (req.file == undefined) {
 
@@ -27,6 +29,7 @@ exports.upload = (req, res) => {
     }
     /* End validate request section */
 
+    console.log(process.env.AWS_BUCKET_NAME);
     const fileContent = fs.readFileSync(req.file.path)
     
     const params = {
