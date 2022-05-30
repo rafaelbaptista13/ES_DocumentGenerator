@@ -17,7 +17,6 @@ module.exports = app => {
      *      '500':
      *         description: An internal error has occoured
      */
-    
     router.post("/upload", upload.single('file'), templates.upload);
   
     app.use('/api/templates', router);
