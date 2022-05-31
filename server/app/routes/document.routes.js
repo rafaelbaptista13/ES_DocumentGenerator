@@ -1,6 +1,8 @@
 const multer = require('multer');
 
-const upload = multer();
+const upload = multer({
+  dest: "uploads/" // "uploads"
+});
 
 module.exports = app => {
     const document = require("../controllers/document.controller.js");
