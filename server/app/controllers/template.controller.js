@@ -2,10 +2,8 @@ const s3 = require("../config/bucketconfig");
 const fs = require("fs");
 
 // Upload Template
-exports.upload = (req, res) => {
+exports.uploadTemplate = (req, res) => {
     
-    console.log("TOu upload")
-    console.log(process.env.AWS_BUCKET_NAME);
     /* Validate request section */
     if (req.file == undefined) {
 
@@ -29,30 +27,59 @@ exports.upload = (req, res) => {
     }
     /* End validate request section */
 
-    console.log(process.env.AWS_BUCKET_NAME);
     const fileContent = fs.readFileSync(req.file.path)
     
     const params = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: filename,
+        Key: "templates/"+filename,
         Body: fileContent
     }
 
 
     s3.upload(params, (err, data) => {
         if (err) {
-            console.log("Erro no upload: ", err)
-
             res.status(500).send({
                 message: "An error occurred while uploading the template!"
             });
         }
-            console.log("Sucesso no upload.")
-
             res.status(201).send({
                 message: "Template upload with sucess!"
             });
         })
+
+  };
+  
+
+
+
+
+// Get Current Templates
+exports.getCurrentTemplates = (req, res) => {
+    
+    
+    var params = {
+        Bucket:  process.env.AWS_BUCKET_NAME,
+        Prefix: "templates/"
+    };
+      
+    s3.listObjectsV2(params, function(err, data) {
+        if (err) {
+            res.status(500).send({
+                message: "An error occurred while retrieving the current template list!"
+            });
+        }
+        else {
+            var templates = []
+            data.Contents.forEach(element => {
+                templates.push(element.Key.substring(10,))
+            }); 
+
+            res.status(200).send({
+                message: "Templates were retrieved with success!",
+                templates: templates
+            });
+        }
+    });
 
   };
   

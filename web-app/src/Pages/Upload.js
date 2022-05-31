@@ -9,11 +9,8 @@ function Upload (){
 
     const [file, setFile] = useState("");
 
-    function getTemplate(e) {
+    function uploadTemplate(e) {
         e.preventDefault();
-        console.log("entrei")
-        console.log(file)
-
         TemplateService.upload_template(file);
     }
 
@@ -21,7 +18,7 @@ function Upload (){
         <div style={{marginLeft: '10%', marginRight: '10%', marginTop: '2%'}}>
             <h1>Upload a template</h1>
             <br/>
-            <form onSubmit={getTemplate}>
+            <form onSubmit={uploadTemplate}>
                 <Form.Group controlId="formFile" className="mb-3">
                     <Form.Label>Upload a document template</Form.Label>
                     <Form.Control type="file" 
