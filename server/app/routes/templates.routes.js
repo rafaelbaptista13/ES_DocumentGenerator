@@ -38,6 +38,23 @@ module.exports = app => {
      */
     
      router.get("/", templates.getCurrentTemplates);
+
+
+     /**
+     * @swagger
+     * /api/templates/:id:
+     *  delete:
+     *    description: Delete a template by name
+     *    responses: 
+     *      '200':
+     *         description: Deleted template with success
+     *      '400':
+     *         description: Bad request occured due to lack of template information to delete (name)
+     *      '500':
+     *         description: An internal error has occoured
+     */
+    router.delete("/:name", templates.deleteTemplate);
+
   
     app.use('/api/templates', router);
   };

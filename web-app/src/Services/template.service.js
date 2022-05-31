@@ -2,28 +2,55 @@ import {urlAPI} from "../Data/data";
 
 class TemplateService {
 
+    async get_current_templates() {
+        
+        var url = urlAPI + 'api/templates/';
+        
+        try {
+
+            var res = await fetch(url);
+
+            return res;
+        } catch (err) {
+            return "Unable to reach server to get available templates ! Please try again later."
+        }
+    }
+
     async upload_template(file) {
 
         let formData = new FormData()
         formData.append('file', file)
         
         var url = urlAPI + 'api/templates/upload';
-        await fetch(url, {
-            method:'POST',
-            body: formData
-        });
 
-        return;
+        try {
+            var res = await fetch(url, {
+                method:'POST',
+                body: formData
+            })
+
+            return res;
+        } catch (err) {
+            return "Unable to reach server to perform upload operation! Please try again later."
+        }     
     }
 
-    async get_current_templates() {
+    async delete_template(template) {
+    
+        var url = urlAPI + 'api/templates/' + template;
         
-        var url = urlAPI + 'api/templates/';
-        
-        var res = await fetch(url)
-        
-        return res.json();
+        try {
+
+            var res = await fetch(url, {
+                method:'DELETE',
+            })
+
+            return res;
+        } catch (err) {
+            return "Unable to reach server to perform delete operation! Please try again later."
+        }
     }
+    
 
 }
 
