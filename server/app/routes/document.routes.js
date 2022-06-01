@@ -1,11 +1,7 @@
 const multer = require("multer");
 
 const documentsFilter = (req, file, cb) => {
-	if (
-		file.mimetype == "application/json" ||
-		file.mimetype ==
-			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	) {
+	if (file.mimetype == "application/json") {
 		cb(null, true);
 	} else {
 		cb(null, false);
@@ -15,6 +11,9 @@ const documentsFilter = (req, file, cb) => {
 const upload = multer({
 	dest: "uploads/", // "uploads"
 	fileFilter: documentsFilter,
+	limits: {
+		fileSize: 20000000, // 20MB
+	},
 });
 
 module.exports = (app) => {
@@ -35,7 +34,7 @@ module.exports = (app) => {
 	router.post(
 		"/",
 		upload.fields([
-			{ name: "template", maxCount: 1 },
+			{ name: "template_name" },
 			{ name: "jsonfile", maxCount: 1 },
 		]),
 		document.generate

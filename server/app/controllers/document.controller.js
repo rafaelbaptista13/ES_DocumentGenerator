@@ -1,19 +1,21 @@
 const Excel = require("exceljs");
+const s3 = require("../config/bucketconfig");
+const fs = require("fs");
 
 // Generate a document
-exports.generate = (req, res) => {
-	let template = req.files.template[0];
+exports.generate = async (req, res) => {
 	let jsonfile = req.files.jsonfile[0];
+	let template_name = req.body.template_name;
+	let template_path = "uploads/"+template_name;
 
 	/* Validate request section */
-	if (template == undefined) {
+	if (template_name == undefined) {
 		res.status(400).send({
 			message:
-				"You must send a 'xlsx', 'pptx' or 'docx' file in order to generate a file.",
+				"You must send the template file name.",
 		});
 		return;
 	}
-
 	if (jsonfile == undefined) {
 		res.status(400).send({
 			message: "You must send a JSON file in order to generate a file.",
@@ -22,16 +24,35 @@ exports.generate = (req, res) => {
 	}
 	/* End validate request section */
 
-	const fs = require("fs");
+	// Get template from bucket
+	let params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Key: "templates/" + req.body.template_name,
+	};
+	const template = await s3.getObject(params).promise().catch((err) => {
+		console.error(err.message);
+		return false;
+	});
+
+	// Case of bucket error
+	if(template === false) {
+		res.status(500).send({
+			message: "Template was not found.",
+		});
+		return;
+	}
+
+	// Temporary store the file
+	fs.writeFileSync(template_path, template.Body);
+
+	// Read json file and parse it
 	let rawdata = fs.readFileSync(jsonfile.path, "utf-8");
 	let json = JSON.parse(rawdata);
 
 	let success = false;
-	if (
-		template.mimetype ===
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	)
-		success = readJSON_writeExcel(template, json);
+
+	// TODO: CHECK FILE TYPE;
+	success = await readJSON_writeExcel(template_path, json);	// Open and rewrite the excel file
 
 	// Return message
 	if (success) {
@@ -46,16 +67,16 @@ exports.generate = (req, res) => {
 
 	// Delete temporary files
 	fs.unlinkSync(jsonfile.path);
-	fs.unlinkSync(template.path);
+	fs.unlinkSync(template_path);
 
 	return;
 };
 
-function readJSON_writeExcel(template, json) {
+function readJSON_writeExcel(template_path, json) {
 	var workbook = new Excel.Workbook();
 
-	workbook.xlsx
-		.readFile(template.path)
+	let success = workbook.xlsx
+		.readFile(template_path)
 		.then(function () {
 			let pages = Object.keys(json);
 			var firstLetterIdx = "A".charCodeAt() - 1;
@@ -81,11 +102,15 @@ function readJSON_writeExcel(template, json) {
 			});
 
 			workbook.xlsx.writeFile("Excel.xlsx");
+
+			// TODO: Store excel in s3 bucket
+
+			return true;
 		})
 		.catch((err) => {
 			console.error(err.message);
 			return false;
 		});
 
-	return true;
+	return success;
 }
