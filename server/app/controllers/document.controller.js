@@ -4,24 +4,26 @@ const fs = require("fs");
 
 // Generate a document
 exports.generate = async (req, res) => {
-	let jsonfile = req.files.jsonfile[0];
-	let template_name = req.body.template_name;
-	let template_path = "uploads/" + template_name;
 
 	/* Validate request section */
-	if (template_name == undefined) {
+	if (req.body.template_name == undefined) {
 		res.status(400).send({
 			message: "You must send the template file name.",
 		});
 		return;
 	}
-	if (jsonfile == undefined) {
+	if (req.files.jsonfile == undefined) {
 		res.status(400).send({
 			message: "You must send a JSON file in order to generate a file.",
 		});
 		return;
 	}
 	/* End validate request section */
+
+	let jsonfile = req.files.jsonfile[0];
+	let template_name = req.body.template_name;
+	let template_path = "uploads/" + template_name;
+
 
 	// Get template from bucket
 	let params = {
@@ -61,7 +63,7 @@ exports.generate = async (req, res) => {
 			json
 		); // Open and rewrite the excel file
 
-	// Return message		TODO: Send link with generated file
+	// Return message
 	if (downloadURL) {
 		fs.unlinkSync("Excel.xlsx");
 		res.status(200).send({
@@ -85,7 +87,13 @@ exports.generate = async (req, res) => {
 async function readJSON_writeExcel(template_name, template_path, json) {
 	var workbook = new Excel.Workbook();
 
-	await workbook.xlsx.readFile(template_path);
+	try {
+		await workbook.xlsx.readFile(template_path);
+	} catch (err) {
+		console.error(err.message);
+		return false;
+	}
+
 	let pages = Object.keys(json);
 	var firstLetterIdx = "A".charCodeAt() - 1;
 
@@ -121,6 +129,7 @@ async function readJSON_writeExcel(template_name, template_path, json) {
 	await s3.upload(params, (err) => {
 		if (err) {
 			console.log("Erro no upload: ", err);
+			return false;
 		}
 		console.log("Sucesso no upload.");
 	});
@@ -130,11 +139,6 @@ async function readJSON_writeExcel(template_name, template_path, json) {
 		Key: "generated/" + template_name,
 		Expires: 60 * 5,
 	});
-
-	/* .catch((err) => {
-		console.error(err.message);
-		return false;
-	}); */
 
 	return downloadURL;
 }
