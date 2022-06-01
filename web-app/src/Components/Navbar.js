@@ -30,6 +30,11 @@ const Navbar = () => {
               Generate Document
             </a>
           </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/templates">
+              Available Templates
+            </a>
+          </li>
         </ul>
       </div>
     </nav>

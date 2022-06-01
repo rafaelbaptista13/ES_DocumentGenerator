@@ -2,4 +2,3 @@
 cd /home/ec2-user/server
 set -e
 yum update -y
-pm2 update
