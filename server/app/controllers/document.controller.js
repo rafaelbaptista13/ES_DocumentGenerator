@@ -1,6 +1,7 @@
 const Excel = require("exceljs");
 const s3 = require("../config/bucketconfig");
 const fs = require("fs");
+const uuid = require('uuid');
 
 // Generate a document
 exports.generate = async (req, res) => {
@@ -48,24 +49,38 @@ exports.generate = async (req, res) => {
 
 	// Temporary store the file
 	fs.writeFileSync(template_path, template.Body);
+
 	// Read json file and parse it
 	let rawdata = fs.readFileSync(jsonfile.path, "utf-8");
-	let json = JSON.parse(rawdata);
 
-	// TODO: CHECK FILE TYPE
+	let json;
+	try {
+		json = JSON.parse(rawdata);
+	} catch(err) {
+		res.status(400).send({
+			message: "JSON is not correctly formated",
+		});
+		fs.unlinkSync(jsonfile.path);
+		fs.unlinkSync(template_path);
+		return;
+	}
+
 	let extension = template_path.split(".").pop();
 
+	let file_uid;
 	let downloadURL;
-	if (extension === "xlsx")
+	if (extension === "xlsx") {
+		file_uid = uuid.v1() + ".xlsx";
+	
 		downloadURL = await readJSON_writeExcel(
-			template_name,
+			file_uid,
 			template_path,
 			json
 		); // Open and rewrite the excel file
+	}
 
 	// Return message
 	if (downloadURL) {
-		fs.unlinkSync("Excel.xlsx");
 		res.status(200).send({
 			message: "Document generated with sucess!",
 			downloadURL: downloadURL,
@@ -79,50 +94,50 @@ exports.generate = async (req, res) => {
 	// Delete temporary files
 	fs.unlinkSync(jsonfile.path);
 	fs.unlinkSync(template_path);
-	fs.unlinkSync("Excel.xlsx");
+	fs.unlinkSync(file_uid);
 
 	return;
 };
 
-async function readJSON_writeExcel(template_name, template_path, json) {
-	var workbook = new Excel.Workbook();
-
+async function readJSON_writeExcel(file_uid, template_path, json) {
 	try {
+		var workbook = new Excel.Workbook();
+
 		await workbook.xlsx.readFile(template_path);
+
+		let pages = Object.keys(json);
+		var firstLetterIdx = "A".charCodeAt() - 1;
+
+		pages.forEach((element) => {
+			const pageJson = json[element];
+			const pagename = Object.keys(pageJson);
+			var worksheet = workbook.getWorksheet(String(pagename));
+
+			pagename.forEach((element) => {
+				const newJson = pageJson[element];
+
+				const fields = Object.keys(newJson);
+				fields.forEach((element) => {
+					var key = Object.keys(newJson[element]);
+					var col_row = String(key).match(/[a-zA-Z]+|[0-9]+/g);
+					var col_number = col_row[0].charCodeAt() - firstLetterIdx;
+					worksheet.getRow(col_row[1]).getCell(col_number).value =
+						newJson[element][key];
+				});
+			});
+		});
+		await workbook.xlsx.writeFile(file_uid);
 	} catch (err) {
 		console.error(err.message);
 		return false;
 	}
 
-	let pages = Object.keys(json);
-	var firstLetterIdx = "A".charCodeAt() - 1;
-
-	pages.forEach((element) => {
-		const pageJson = json[element];
-		const pagename = Object.keys(pageJson);
-		var worksheet = workbook.getWorksheet(String(pagename));
-
-		pagename.forEach((element) => {
-			const newJson = pageJson[element];
-
-			const fields = Object.keys(newJson);
-			fields.forEach((element) => {
-				var key = Object.keys(newJson[element]);
-				var col_row = String(key).match(/[a-zA-Z]+|[0-9]+/g);
-				var col_number = col_row[0].charCodeAt() - firstLetterIdx;
-				worksheet.getRow(col_row[1]).getCell(col_number).value =
-					newJson[element][key];
-			});
-		});
-	});
-	await workbook.xlsx.writeFile("Excel.xlsx");
-
 	// Store excel in s3 bucket
-	const fileContent = fs.readFileSync("Excel.xlsx");
+	const fileContent = fs.readFileSync(file_uid);
 
 	const params = {
 		Bucket: process.env.AWS_BUCKET_NAME,
-		Key: "generated/" + template_name,
+		Key: "documents/" + file_uid,
 		Body: fileContent,
 	};
 
@@ -136,7 +151,7 @@ async function readJSON_writeExcel(template_name, template_path, json) {
 
 	const downloadURL = s3.getSignedUrl("getObject", {
 		Bucket: process.env.AWS_BUCKET_NAME,
-		Key: "generated/" + template_name,
+		Key: "documents/" + file_uid,
 		Expires: 60 * 5,
 	});
 
