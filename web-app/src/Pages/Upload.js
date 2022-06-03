@@ -14,19 +14,20 @@ function Upload (){
         e.preventDefault();
         hide_everything();
         var res = await TemplateService.upload_template(file);
+        var json;
 
-        if (res.status == undefined) {
+        if (res.status === undefined) {
             setErrorMessage(res)
             display_error_message();
         } 
-        else if (res.status == 201) {
-            var json = await res.json();
+        else if (res.status === 201) {
+            json = await res.json();
             setSuccessMessage(json["message"])
             display_success_message();
             
         } 
         else {
-            var json = await res.json();
+            json = await res.json();
             setErrorMessage(json["message"])
             display_error_message();
         }
