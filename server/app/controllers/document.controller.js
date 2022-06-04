@@ -1,11 +1,10 @@
-const Excel = require("exceljs");
 const s3 = require("../config/bucketconfig");
 const fs = require("fs");
-const uuid = require('uuid');
+const uuid = require("uuid");
+const XlsxPopulate = require("xlsx-populate");
 
 // Generate a document
 exports.generate = async (req, res) => {
-
 	/* Validate request section */
 	if (req.body.template_name == undefined) {
 		res.status(400).send({
@@ -24,7 +23,6 @@ exports.generate = async (req, res) => {
 	let jsonfile = req.files.jsonfile[0];
 	let template_name = req.body.template_name;
 	let template_path = "uploads/" + template_name;
-
 
 	// Get template from bucket
 	let params = {
@@ -56,7 +54,7 @@ exports.generate = async (req, res) => {
 	let json;
 	try {
 		json = JSON.parse(rawdata);
-	} catch(err) {
+	} catch (err) {
 		res.status(400).send({
 			message: "JSON is not correctly formated",
 		});
@@ -71,12 +69,8 @@ exports.generate = async (req, res) => {
 	let downloadURL;
 	if (extension === "xlsx") {
 		file_uid = uuid.v1() + ".xlsx";
-	
-		downloadURL = await readJSON_writeExcel(
-			file_uid,
-			template_path,
-			json
-		); // Open and rewrite the excel file
+
+		downloadURL = await readJSON_writeExcel(file_uid, template_path, json); // Open and rewrite the excel file
 	}
 
 	// Return message
@@ -101,32 +95,30 @@ exports.generate = async (req, res) => {
 
 async function readJSON_writeExcel(file_uid, template_path, json) {
 	try {
-		var workbook = new Excel.Workbook();
-
-		await workbook.xlsx.readFile(template_path);
+		const workbook = await XlsxPopulate.fromFileAsync(template_path);
 
 		let pages = Object.keys(json);
-		var firstLetterIdx = "A".charCodeAt() - 1;
-
 		pages.forEach((element) => {
 			const pageJson = json[element];
-			const pagename = Object.keys(pageJson);
-			var worksheet = workbook.getWorksheet(String(pagename));
+			const pagenames = Object.keys(pageJson);
 
-			pagename.forEach((element) => {
-				const newJson = pageJson[element];
+			pagenames.forEach((pagename) => {
+				const newJson = pageJson[pagename];
 
-				const fields = Object.keys(newJson);
-				fields.forEach((element) => {
-					var key = Object.keys(newJson[element]);
-					var col_row = String(key).match(/[a-zA-Z]+|[0-9]+/g);
-					var col_number = col_row[0].charCodeAt() - firstLetterIdx;
-					worksheet.getRow(col_row[1]).getCell(col_number).value =
-						newJson[element][key];
+				newJson.forEach((element) => {
+					var key = String(Object.keys(element));
+					var value = element[key];
+
+					// Create sheet if doesnt exist
+					if (workbook.sheet(pagename) === undefined) {
+						workbook.addSheet(pagename);
+					}
+					workbook.sheet(pagename).cell(key).value(value);
 				});
 			});
 		});
-		await workbook.xlsx.writeFile(file_uid);
+
+		await workbook.toFileAsync(file_uid);
 	} catch (err) {
 		console.error(err.message);
 		return false;
