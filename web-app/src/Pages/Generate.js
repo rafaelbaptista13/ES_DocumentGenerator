@@ -9,6 +9,12 @@ function Generate (){
     const [current_templates, setCurrentTemplates] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [selectedJSON, setSelectedJSON] = useState();
+
+	const changeJSON = (event) => {
+		setSelectedJSON(event.target.files[0]);
+	};
+
 
     function display_error_message(elementId) {
         document.getElementById(elementId).style.display = "block";
@@ -23,32 +29,24 @@ function Generate (){
     async function generate_document(e) {
         e.preventDefault();
         var template_element = document.getElementById("formTemplateSelect");
-        var json_element = document.getElementById("formJsonFile")
-        
         var template;
-        var json;
-        var validRequest = true
 
         if (template_element.selectedIndex !== 0) {
             template = template_element.options[template_element.selectedIndex].text;
         } else {
-            validRequest = false;
             display_error_message("erroInvalidTemplate")
+            return;
         }
 
-        if (json_element.value !== undefined && json_element.value !== "") {
-            json = json_element.value
-        } else {
-            validRequest = false;
+        if (selectedJSON === undefined) {
             display_error_message("erroInvalidJson")
+            return;
         }
 
-        if (validRequest) {
-            var res = await DocumentService.generate_document(json, template);
-            console.log(res);
+        var res = await DocumentService.generate_document(selectedJSON, template);
+        console.log(res);
 
-            /* FALTA TRATAR DA RESPOSTA QUE VEM DO SERVIDOR */
-        }
+        /* FALTA TRATAR DA RESPOSTA QUE VEM DO SERVIDOR */
         
     }
 
@@ -109,7 +107,7 @@ function Generate (){
                 <br/>
                 <Form.Group controlId="formJsonFile" className="mb-3">
                     <Form.Label>Upload a JSON file</Form.Label>
-                    <Form.Control type="file" />
+                    <Form.Control type="file" onChange={changeJSON}/>
                 </Form.Group>
                 <br />
                 <Button as="input" type="submit" value="Generate" />
