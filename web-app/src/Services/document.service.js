@@ -8,7 +8,7 @@ class DocumentService {
         formData.append('json', json)
         formData.append('template', template)
         
-        var url = urlAPI + 'api/documents/';
+        var url = urlAPI + '/documents/';
 
         try {
             var res = await fetch(url, {
