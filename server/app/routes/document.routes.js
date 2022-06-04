@@ -28,6 +28,10 @@ module.exports = (app) => {
 	 *    responses:
 	 *      '200':
 	 *         description: Document generation was performed with success
+	 * 		'400':
+	 * 		   description: Bad request. Missing template name, missing json file or json file with wrong format.
+	 * 		'404':
+	 * 		   description: Requested template does not exist.
 	 *      '500':
 	 *         description: An internal error has occoured
 	 */

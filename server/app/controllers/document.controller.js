@@ -39,8 +39,8 @@ exports.generate = async (req, res) => {
 
 	// Case of bucket error
 	if (template === false) {
-		res.status(500).send({
-			message: "Template was not found.",
+		res.status(404).send({
+			message: "Requested template was not found.",
 		});
 		return;
 	}
@@ -76,12 +76,12 @@ exports.generate = async (req, res) => {
 	// Return message
 	if (downloadURL) {
 		res.status(200).send({
-			message: "Document generated with sucess!",
+			message: "Document was generated with success!",
 			downloadURL: downloadURL,
 		});
 	} else {
 		res.status(500).send({
-			message: "Error Generating the Document",
+			message: "An error occured while generating the document.",
 		});
 	}
 
