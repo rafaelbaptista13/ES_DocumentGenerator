@@ -2,4 +2,4 @@
 cd /home/ec2-user/server
 set -e
 yum update -y
-ps aux | grep node | cut -d' ' -f7 | sudo xargs kill -KILL
+ps aux | grep node | awk '{print $2}' | sudo xargs kill -KILL
