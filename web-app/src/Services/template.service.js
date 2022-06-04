@@ -4,7 +4,7 @@ class TemplateService {
 
     async get_current_templates() {
         
-        var url = urlAPI + 'api/templates/';
+        var url = urlAPI + '/templates/';
         
         try {
 
@@ -21,7 +21,7 @@ class TemplateService {
         let formData = new FormData()
         formData.append('file', file)
         
-        var url = urlAPI + 'api/templates/upload';
+        var url = urlAPI + '/templates/upload';
 
         try {
             var res = await fetch(url, {
@@ -37,7 +37,7 @@ class TemplateService {
 
     async delete_template(template) {
     
-        var url = urlAPI + 'api/templates/' + template;
+        var url = urlAPI + '/templates/' + template;
         
         try {
 

@@ -2,7 +2,6 @@ import React from 'react';
  
 function Home (){
 
-    console.log(process.env.NODE_ENV);
     return (
         <div style={{marginTop: '2%', textAlign: 'center'}}>
             <br/>
