@@ -75,7 +75,6 @@ function Generate (){
         display_message("sucessoGenerate")
 
         var docWindow = window.open(json["downloadURL"], "_blank");
-        docWindow.location.reload();
         /*var form = document.getElementById("formAction")
         var inputAWSAccessKeyID = document.getElementById("inputAWSAccessKeyID")
         var inputExpires = document.getElementById("inputExpires")
