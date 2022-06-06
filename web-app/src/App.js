@@ -7,6 +7,8 @@ import Generate from './Pages/Generate';
 import Home from './Pages/Home';
 import Templates from './Pages/Templates'
 
+
+
 function App() {
   return (
     <div>
@@ -22,5 +24,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;

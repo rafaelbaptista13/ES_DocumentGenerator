@@ -22,7 +22,7 @@ module.exports = (app) => {
 
 	/**
 	 * @swagger
-	 * /api/generate/:
+	 * /api/documents/:
 	 *  post:
 	 *    description: Generate a document from a template and a JSON file
 	 *    responses:
@@ -40,5 +40,5 @@ module.exports = (app) => {
 		document.generate
 	);
 
-	app.use("/api/generate", router);
+	app.use("/api/documents", router);
 };

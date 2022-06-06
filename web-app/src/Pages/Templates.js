@@ -35,20 +35,20 @@ function Templates (){
         hide_everything();
 
         var res = await TemplateService.delete_template(template);
+        var json;
 
-        if (res.status == undefined) {
-            console.log("tou primeiro")
+        if (res.status === undefined) {
             setErrorMessage(res)
             display_error_message();
             return
         }
-        else if (res.status != 200) {
-            var json = await res.json();
+        else if (res.status !== 200) {
+            json = await res.json();
             setErrorMessage(json["message"])
             display_error_message();
             return
         } else {
-            var json = await res.json();
+            json = await res.json();
             setSuccessMessage(json["message"])
             display_success_message();
         }
@@ -58,20 +58,21 @@ function Templates (){
             async function fetchCurrentTemplates() {
 
                 var res = await TemplateService.get_current_templates();
+                var json;
 
-                if (res.status == undefined) {
+                if (res.status === undefined) {
                     setErrorMessage(res)
                     display_error_message();
                     return
                 }
-                else if (res.status != 200) {
-                    var json = await res.json();
+                else if (res.status !== 200) {
+                    json = await res.json();
                     setErrorMessage(json["message"])
                     display_error_message();
                     return
                 }
 
-                var json = await res.json();
+                json = await res.json();
             
                 setCurrentTemplates(json["templates"]);
 
@@ -107,7 +108,7 @@ function Templates (){
                 </thead>
                 <tbody>
                     {
-                        current_templates.length == 0 ?
+                        current_templates.length === 0 ?
                             <tr>
                                 <th style={{textAlgin:"center"}}>No templates available</th> 
                                 <td></td>
