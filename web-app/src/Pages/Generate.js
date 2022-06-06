@@ -1,5 +1,4 @@
 import { React, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 
 import TemplateService from "../Services/template.service";
@@ -16,10 +15,6 @@ function Generate() {
 	const changeJSON = (event) => {
 		setSelectedJSON(event.target.files[0]);
 	};
-
-	function display_message(elementId) {
-		document.getElementById(elementId).style.display = "block";
-	}
 
 	function display_message(elementId) {
 		document.getElementById(elementId).style.display = "block";
@@ -219,16 +214,25 @@ function Generate() {
 					<Form.Control type="file" onChange={changeJSON} />
 				</Form.Group>
 				<br />
-				<Button as="input" type="submit" value="Generate" />
+				<div className="row">
+					<div className="col" style={{ textAlign: "center" }}>
+						<Button as="input" type="submit" value="Generate" />
+					</div>
+					<div className="col" style={{ textAlign: "center" }}>
+						{downloadURL !== undefined && (
+							<button type="button" className="btn btn-success">
+								<a
+									href={downloadURL}
+									download
+									style={{ color: "white" }}
+								>
+									Download File!
+								</a>
+							</button>
+						)}
+					</div>
+				</div>
 			</form>
-
-			{downloadURL !== undefined && (
-				<button type="button">
-					<a href={downloadURL} download>
-						Download File!
-					</a>
-				</button>
-			)}
 		</div>
 	);
 }
