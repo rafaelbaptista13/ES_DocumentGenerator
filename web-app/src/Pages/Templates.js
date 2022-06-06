@@ -7,7 +7,7 @@ function Templates (){
     const [current_templates, setCurrentTemplates] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const [boolToUpdatePage, setBoolToUpdatePage] = useState(false);
+    const [boolToUpdatePage, setBoolToUpdatePage] = useState(true);
 
     function display_error_message() {
         document.getElementById("sucessoDelete").style.display = "none";
@@ -51,32 +51,37 @@ function Templates (){
             json = await res.json();
             setSuccessMessage(json["message"])
             display_success_message();
+            setBoolToUpdatePage(true)
         }
     }
     
     useEffect(() => {
             async function fetchCurrentTemplates() {
 
-                var res = await TemplateService.get_current_templates();
-                var json;
+                if (boolToUpdatePage) {
 
-                if (res.status === undefined) {
-                    setErrorMessage(res)
-                    display_error_message();
-                    return
-                }
-                else if (res.status !== 200) {
+                    var res = await TemplateService.get_current_templates();
+                    var json;
+
+                    if (res.status === undefined) {
+                        setErrorMessage(res)
+                        display_error_message();
+                        return
+                    }
+                    else if (res.status !== 200) {
+                        json = await res.json();
+                        setErrorMessage(json["message"])
+                        display_error_message();
+                        return
+                    }
+
                     json = await res.json();
-                    setErrorMessage(json["message"])
-                    display_error_message();
-                    return
+                
+                    setCurrentTemplates(json["templates"]);
+
+                    setBoolToUpdatePage(false)
+                
                 }
-
-                json = await res.json();
-            
-                setCurrentTemplates(json["templates"]);
-
-                setBoolToUpdatePage(!boolToUpdatePage)
             }
 
             fetchCurrentTemplates()
