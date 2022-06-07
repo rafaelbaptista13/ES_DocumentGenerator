@@ -45,10 +45,9 @@ exports.generate = async (req, res) => {
 
 	// Case of bucket error
 	if (template === false) {
-		res.status(500).send({
+		return res.status(500).send({
 			message: "Template was not found.",
 		});
-		return;
 	}
 
 	// Temporary store the file
@@ -69,15 +68,13 @@ exports.generate = async (req, res) => {
 		return;
 	}
 
-	//console.log(json);
-	//console.log(template_path);
 
 	process.on('uncaughtException', (error) => {
 		console.log("Uncaught Exception: " + error.message )
 		res.status(500).send({
 			message: "Error Generating the Document",
 		});
-		//process.exit(1)
+		return;
 	 });
 
 
@@ -102,9 +99,16 @@ exports.generate = async (req, res) => {
 		case 'docx':
 
 			file_uid = uuid.v1() + ".docx";
+			try{
+				downloadURL =  await populateDocx( file_uid, template_path, json); // populate word document
+			}catch(err){
+				res.status(406).send({
+					message: ` ${err.properties.errors[0]} . `
+				});
+				return;
+			}
+			
 
-			downloadURL = await populateDocx( file_uid, template_path, json);			// populate word document
-			console.log(downloadURL);
 			break;
 		
 		case 'pptx':
@@ -115,20 +119,23 @@ exports.generate = async (req, res) => {
 			break;
 
 		default:
-
+			console.log("aki");
 			res.status(500).send({
-				message: "Invalid document format ${extension}",
+				message: `Invalid document format ${extension}`,
 			});
+			return;
 
 	}
 
 	// Return message
 	if (downloadURL) {
+		console.log("aki");
 		res.status(200).send({
 			message: "Document generated with sucess!",
 			downloadURL: downloadURL,
 		});
 	} else {
+		console.log("aki");
 		res.status(500).send({
 			message: "Error Generating the Document",
 		});
@@ -161,11 +168,14 @@ async function populatePptx(file_uid, template_path, json){
 		const zip  = new PizZip(content);
 	
 		// define delimiters
-	
+
+
 		const doc = new Docxtemplater(zip, {
 			delimiters: { start: "{", end: "}" },
 			
 		})
+
+
 	
 		doc.modules.forEach(function (module) {
 			if (module.name === "LoopModule") {
@@ -176,15 +186,8 @@ async function populatePptx(file_uid, template_path, json){
 		
 		// populate document
 	
-		try {
-			doc.render(json[0])
-		} catch (error) {
-			console.log("error.message.explanation");
-			res.status(400).send({
-				message: "Invalid Word template format!"
-			});
-			
-		}
+		doc.render(json[0])
+
 	
 		const htmlContent = "<h2><span style='color: #99ccff;'>Use O2M as M2M relationship for Edit UI Action</span></h2> <p><br /></p> <p>For the following scenario:</p> <ul style='list-style-position: inside;'><li>Table A</li><li>Table B</li><li>Table C</li></ul> <p>Table B has a reference to Table A and to Table C. Table B is a related list on the Table A form.<br /></p> <p><br /></p> <p>If you want to relate records from Table C to Table A, making Table B behave like a M2M (when using the &#34;Edit&#34; button on the related list), the OOTB &#34;Edit...&#34; (action name &#34;sysverb_edit_om2&#34;) UI Action needs to be overridden.</p> <p><br /></p> <p>The condition of the new UI Action should be:</p> <pre class='language-javascript'><code>(new GlideRecord(current.getTableName())).canWrite() &amp;&amp; RP.isRelatedList() &amp;&amp; !RP.getListControl().isOmitEditButton()</code></pre> <p><br /></p> <p>The script should contain the following:</p> <pre class='language-javascript'><code>var uri &#61; action.getGlideURI(); var path &#61; uri.getFileFromPath(); uri.set(&#39;sysparm_m2m_ref&#39;, current.getTableName()); uri.set(&#39;sysparm_stack&#39;, &#39;no&#39;); uri.set(&#39;sysparm_query&#39;, &#39;&#39;); uri.set(&#39;sysparm_collection_related_field&#39;, &#39;&lt;field on table B that references table C&gt;&#39;); uri.set(&#39;sysparm_collection_related_file&#39;, &#39;&lt;table C name&gt;&#39;); action.setRedirectURL(uri.toString(&#39;sys_m2m_template.do&#39;));</code></pre>";
 	
@@ -249,10 +252,15 @@ async function  populateDocx(file_uid, template_path, json){
 
 	// define delimiters
 
+
+
 	const doc = new Docxtemplater(zip, {
-		delimiters: { start: "{", end: "}" },
+			delimiters: { start: "{", end: "}" },
+			nullGetter: nullGetter,
 		
-	})
+			
+		})
+
 
 	doc.modules.forEach(function (module) {
 		if (module.name === "LoopModule") {
@@ -264,16 +272,8 @@ async function  populateDocx(file_uid, template_path, json){
 	
 	// populate document
 
-	try {
-		doc.render(json[0]);
-	} catch (error) {
-		console.log(e.properties.explanation);
-		res.status(400).send({
-			message: "Invalid Word template format!"
-		})
-	}
+	doc.render(json);
 
-	const htmlContent = "<h2><span style='color: #99ccff;'>Use O2M as M2M relationship for Edit UI Action</span></h2> <p><br /></p> <p>For the following scenario:</p> <ul style='list-style-position: inside;'><li>Table A</li><li>Table B</li><li>Table C</li></ul> <p>Table B has a reference to Table A and to Table C. Table B is a related list on the Table A form.<br /></p> <p><br /></p> <p>If you want to relate records from Table C to Table A, making Table B behave like a M2M (when using the &#34;Edit&#34; button on the related list), the OOTB &#34;Edit...&#34; (action name &#34;sysverb_edit_om2&#34;) UI Action needs to be overridden.</p> <p><br /></p> <p>The condition of the new UI Action should be:</p> <pre class='language-javascript'><code>(new GlideRecord(current.getTableName())).canWrite() &amp;&amp; RP.isRelatedList() &amp;&amp; !RP.getListControl().isOmitEditButton()</code></pre> <p><br /></p> <p>The script should contain the following:</p> <pre class='language-javascript'><code>var uri &#61; action.getGlideURI(); var path &#61; uri.getFileFromPath(); uri.set(&#39;sysparm_m2m_ref&#39;, current.getTableName()); uri.set(&#39;sysparm_stack&#39;, &#39;no&#39;); uri.set(&#39;sysparm_query&#39;, &#39;&#39;); uri.set(&#39;sysparm_collection_related_field&#39;, &#39;&lt;field on table B that references table C&gt;&#39;); uri.set(&#39;sysparm_collection_related_file&#39;, &#39;&lt;table C name&gt;&#39;); action.setRedirectURL(uri.toString(&#39;sys_m2m_template.do&#39;));</code></pre>";
 
 
 	const buf = doc.getZip().generate({
@@ -286,7 +286,7 @@ async function  populateDocx(file_uid, template_path, json){
 	const fileContent = fs.readFileSync(file_uid);
 	
 
-	// store result in s3
+	// // store result in s3
 
 	let params = {
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -313,8 +313,31 @@ async function  populateDocx(file_uid, template_path, json){
 
 	
 
-
 	return downloadURL;
+}
+
+function nullGetter(part, scopeManager) {
+    /*
+        If the template is {#users}{name}{/} and a value is undefined on the
+        name property:
+
+        - part.value will be the string "name"
+        - scopeManager.scopePath will be ["users"] (for nested loops, you would have multiple values in this array, for example one could have ["companies", "users"])
+        - scopeManager.scopePathItem will be equal to the array [2] if
+          this happens for the third user in the array.
+        - part.module would be empty in this case, but it could be "loop",
+          "rawxml", or or any other module name that you use.
+    */
+
+    if (!part.module) {
+        // part.value contains the content of the tag, eg "name" in our example
+        // By returning '{' and part.value and '}', it will actually do no replacement in reality. You could also return the empty string if you prefered.
+        return "{" + part.value + "}";
+    }
+    if (part.module === "rawxml") {
+        return "";
+    }
+    return "";
 }
 
 /**
