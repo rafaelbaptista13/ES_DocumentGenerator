@@ -39,8 +39,8 @@ exports.generate = async (req, res) => {
 
 	// Case of bucket error
 	if (template === false) {
-		res.status(500).send({
-			message: "Template was not found.",
+		res.status(404).send({
+			message: "Requested template was not found.",
 		});
 		return;
 	}
@@ -56,10 +56,16 @@ exports.generate = async (req, res) => {
 		json = JSON.parse(rawdata);
 	} catch (err) {
 		res.status(400).send({
-			message: "JSON is not correctly formated",
+			message: "JSON is not correctly formatted",
 		});
-		fs.unlinkSync(jsonfile.path);
-		fs.unlinkSync(template_path);
+		fs.unlinkSync(jsonfile.path, (err) => {
+			if (err && err.code === "ENOENT")
+				console.log("File " + jsonfile.path + " not found.");
+		});
+		fs.unlinkSync(template_path, (err) => {
+			if (err && err.code === "ENOENT")
+				console.log("File " + template_path + " not found.");
+		});
 		return;
 	}
 
@@ -76,19 +82,28 @@ exports.generate = async (req, res) => {
 	// Return message
 	if (downloadURL) {
 		res.status(200).send({
-			message: "Document generated with sucess!",
+			message: "Document was generated with success!",
 			downloadURL: downloadURL,
 		});
 	} else {
 		res.status(500).send({
-			message: "Error Generating the Document",
+			message: "An error occured while generating the document.",
 		});
 	}
 
 	// Delete temporary files
-	fs.unlinkSync(jsonfile.path);
-	fs.unlinkSync(template_path);
-	fs.unlinkSync(file_uid);
+	fs.unlink(jsonfile.path, (err) => {
+		if (err && err.code === "ENOENT")
+			console.log("File " + jsonfile.path + " not found.");
+	});
+	fs.unlink(template_path, (err) => {
+		if (err && err.code === "ENOENT")
+			console.log("File " + template_path + " not found.");
+	});
+	fs.unlink(file_uid, (err) => {
+		if (err && err.code === "ENOENT")
+			console.log("File " + file_uid + " not found.");
+	});
 
 	return;
 };
@@ -138,7 +153,6 @@ async function readJSON_writeExcel(file_uid, template_path, json) {
 			console.log("Erro no upload: ", err);
 			return false;
 		}
-		console.log("Sucesso no upload.");
 	});
 
 	const downloadURL = s3.getSignedUrl("getObject", {
