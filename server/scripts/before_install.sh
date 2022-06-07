@@ -2,3 +2,4 @@
 cd /home/ec2-user/server
 set -e
 yum update -y
+killall node || true

@@ -45,8 +45,8 @@ exports.generate = async (req, res) => {
 
 	// Case of bucket error
 	if (template === false) {
-		return res.status(500).send({
-			message: "Template was not found.",
+		res.status(404).send({
+			message: "Requested template was not found.",
 		});
 	}
 
@@ -61,13 +61,18 @@ exports.generate = async (req, res) => {
 		json = JSON.parse(rawdata);
 	} catch (err) {
 		res.status(400).send({
-			message: "JSON is not correctly formated",
+			message: "JSON is not correctly formatted",
 		});
-		fs.unlinkSync(jsonfile.path);
-		fs.unlinkSync(template_path);
+		fs.unlinkSync(jsonfile.path, (err) => {
+			if (err && err.code === "ENOENT")
+				console.log("File " + jsonfile.path + " not found.");
+		});
+		fs.unlinkSync(template_path, (err) => {
+			if (err && err.code === "ENOENT")
+				console.log("File " + template_path + " not found.");
+		});
 		return;
 	}
-
 
 	process.on('uncaughtException', (error) => {
 		console.log("Uncaught Exception: " + error.message )
@@ -77,12 +82,11 @@ exports.generate = async (req, res) => {
 		return;
 	 });
 
-
+	
+	// check template extention
 	let extension = template_path.split(".").pop();
 
 	let file_uid;
-
-	console.log('extension:'+ extension );
 
 	switch(extension){
 		case 'xlsx':
@@ -131,20 +135,29 @@ exports.generate = async (req, res) => {
 	if (downloadURL) {
 		console.log("aki");
 		res.status(200).send({
-			message: "Document generated with sucess!",
+			message: "Document was generated with success!",
 			downloadURL: downloadURL,
 		});
 	} else {
 		console.log("aki");
 		res.status(500).send({
-			message: "Error Generating the Document",
+			message: "An error occured while generating the document.",
 		});
 	}
 
 	// Delete temporary files
-	fs.unlinkSync(jsonfile.path);
-	fs.unlinkSync(template_path);
-	fs.unlinkSync(file_uid);
+	fs.unlink(jsonfile.path, (err) => {
+		if (err && err.code === "ENOENT")
+			console.log("File " + jsonfile.path + " not found.");
+	});
+	fs.unlink(template_path, (err) => {
+		if (err && err.code === "ENOENT")
+			console.log("File " + template_path + " not found.");
+	});
+	fs.unlink(file_uid, (err) => {
+		if (err && err.code === "ENOENT")
+			console.log("File " + file_uid + " not found.");
+	});
 
 	return;
 };
@@ -188,9 +201,6 @@ async function populatePptx(file_uid, template_path, json){
 	
 		doc.render(json[0])
 
-	
-		const htmlContent = "<h2><span style='color: #99ccff;'>Use O2M as M2M relationship for Edit UI Action</span></h2> <p><br /></p> <p>For the following scenario:</p> <ul style='list-style-position: inside;'><li>Table A</li><li>Table B</li><li>Table C</li></ul> <p>Table B has a reference to Table A and to Table C. Table B is a related list on the Table A form.<br /></p> <p><br /></p> <p>If you want to relate records from Table C to Table A, making Table B behave like a M2M (when using the &#34;Edit&#34; button on the related list), the OOTB &#34;Edit...&#34; (action name &#34;sysverb_edit_om2&#34;) UI Action needs to be overridden.</p> <p><br /></p> <p>The condition of the new UI Action should be:</p> <pre class='language-javascript'><code>(new GlideRecord(current.getTableName())).canWrite() &amp;&amp; RP.isRelatedList() &amp;&amp; !RP.getListControl().isOmitEditButton()</code></pre> <p><br /></p> <p>The script should contain the following:</p> <pre class='language-javascript'><code>var uri &#61; action.getGlideURI(); var path &#61; uri.getFileFromPath(); uri.set(&#39;sysparm_m2m_ref&#39;, current.getTableName()); uri.set(&#39;sysparm_stack&#39;, &#39;no&#39;); uri.set(&#39;sysparm_query&#39;, &#39;&#39;); uri.set(&#39;sysparm_collection_related_field&#39;, &#39;&lt;field on table B that references table C&gt;&#39;); uri.set(&#39;sysparm_collection_related_file&#39;, &#39;&lt;table C name&gt;&#39;); action.setRedirectURL(uri.toString(&#39;sys_m2m_template.do&#39;));</code></pre>";
-	
 	
 		const buf = doc.getZip().generate({
 			type: "nodebuffer",
@@ -252,12 +262,8 @@ async function  populateDocx(file_uid, template_path, json){
 	// define delimiters
 
 
-
 	const doc = new Docxtemplater(zip, {
-			delimiters: { start: "{", end: "}" },
-			nullGetter: nullGetter,
-		
-			
+			delimiters: { start: "{", end: "}" },			
 		})
 
 
@@ -315,30 +321,6 @@ async function  populateDocx(file_uid, template_path, json){
 	return downloadURL;
 }
 
-function nullGetter(part, scopeManager) {
-    /*
-        If the template is {#users}{name}{/} and a value is undefined on the
-        name property:
-
-        - part.value will be the string "name"
-        - scopeManager.scopePath will be ["users"] (for nested loops, you would have multiple values in this array, for example one could have ["companies", "users"])
-        - scopeManager.scopePathItem will be equal to the array [2] if
-          this happens for the third user in the array.
-        - part.module would be empty in this case, but it could be "loop",
-          "rawxml", or or any other module name that you use.
-    */
-
-    if (!part.module) {
-        // part.value contains the content of the tag, eg "name" in our example
-        // By returning '{' and part.value and '}', it will actually do no replacement in reality. You could also return the empty string if you prefered.
-        return "{" + part.value + "}";
-    }
-    if (part.module === "rawxml") {
-        return "";
-    }
-    return "";
-}
-
 /**
  * Populate a excel document with a given json data.
  * 
@@ -392,7 +374,6 @@ async function readJSON_writeExcel(file_uid, template_path, json) {
 			console.log("Erro no upload: ", err);
 			return false;
 		}
-		console.log("Sucesso no upload.");
 	});
 
 	const downloadURL = s3.getSignedUrl("getObject", {
