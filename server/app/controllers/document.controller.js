@@ -230,7 +230,6 @@ async function populatePptx(file_uid, template_path, json){
 	
 	
 		return downloadURL;
-
 }
 
 /**
