@@ -56,7 +56,7 @@ exports.generate = async (req, res) => {
 		json = JSON.parse(rawdata);
 	} catch (err) {
 		res.status(400).send({
-			message: "JSON is not correctly formated",
+			message: "JSON is not correctly formatted",
 		});
 		fs.unlinkSync(jsonfile.path, (err) => {
 			if (err && err.code === "ENOENT")

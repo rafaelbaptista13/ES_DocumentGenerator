@@ -30,6 +30,8 @@ function Generate() {
 		document.getElementById("erroRetrieve").style.display = "none";
 		document.getElementById("erroInvalidTemplate").style.display = "none";
 		document.getElementById("erroInvalidJson").style.display = "none";
+
+		setDownloadURL();
 	}
 
 	async function generate_document(e) {
