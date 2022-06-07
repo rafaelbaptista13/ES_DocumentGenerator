@@ -123,7 +123,6 @@ exports.generate = async (req, res) => {
 			break;
 
 		default:
-			console.log("aki");
 			res.status(500).send({
 				message: `Invalid document format ${extension}`,
 			});
@@ -133,13 +132,11 @@ exports.generate = async (req, res) => {
 
 	// Return message
 	if (downloadURL) {
-		console.log("aki");
 		res.status(200).send({
 			message: "Document was generated with success!",
 			downloadURL: downloadURL,
 		});
 	} else {
-		console.log("aki");
 		res.status(500).send({
 			message: "An error occured while generating the document.",
 		});
@@ -184,7 +181,7 @@ async function populatePptx(file_uid, template_path, json){
 
 
 		const doc = new Docxtemplater(zip, {
-			delimiters: { start: "{", end: "}" },
+			delimiters: { start: '${', end: '}' },
 			
 		})
 
@@ -263,7 +260,7 @@ async function  populateDocx(file_uid, template_path, json){
 
 
 	const doc = new Docxtemplater(zip, {
-			delimiters: { start: "{", end: "}" },			
+			delimiters: {  start: '${', end: '}' },			
 		})
 
 

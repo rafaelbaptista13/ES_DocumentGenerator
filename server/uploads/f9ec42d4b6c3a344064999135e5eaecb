@@ -1,0 +1,6 @@
+{"name":"joao dao",
+"email":"j.d@email.com",
+"hardware":[
+{"hwname":"my computer", "hwtype":"laptop", "hwid":"comp001"},
+{"hwname":"my phone", "hwtype":"smartphone", "hwid":"phone001"},
+{"hwname":"my screen", "hwtype":"screen", "hwid":"screen001"}]}
