@@ -7,7 +7,7 @@ function Templates (){
     const [current_templates, setCurrentTemplates] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const [boolToUpdatePage, setBoolToUpdatePage] = useState(false);
+    const [boolToUpdatePage, setBoolToUpdatePage] = useState(true);
 
     function display_error_message() {
         document.getElementById("sucessoDelete").style.display = "none";
@@ -35,47 +35,53 @@ function Templates (){
         hide_everything();
 
         var res = await TemplateService.delete_template(template);
+        var json;
 
-        if (res.status == undefined) {
-            console.log("tou primeiro")
+        if (res.status === undefined) {
             setErrorMessage(res)
             display_error_message();
             return
         }
-        else if (res.status != 200) {
-            var json = await res.json();
+        else if (res.status !== 200) {
+            json = await res.json();
             setErrorMessage(json["message"])
             display_error_message();
             return
         } else {
-            var json = await res.json();
+            json = await res.json();
             setSuccessMessage(json["message"])
             display_success_message();
+            setBoolToUpdatePage(true)
         }
     }
     
     useEffect(() => {
             async function fetchCurrentTemplates() {
 
-                var res = await TemplateService.get_current_templates();
+                if (boolToUpdatePage) {
 
-                if (res.status == undefined) {
-                    setErrorMessage(res)
-                    display_error_message();
-                    return
+                    var res = await TemplateService.get_current_templates();
+                    var json;
+
+                    if (res.status === undefined) {
+                        setErrorMessage(res)
+                        display_error_message();
+                        return
+                    }
+                    else if (res.status !== 200) {
+                        json = await res.json();
+                        setErrorMessage(json["message"])
+                        display_error_message();
+                        return
+                    }
+
+                    json = await res.json();
+                
+                    setCurrentTemplates(json["templates"]);
+
+                    setBoolToUpdatePage(false)
+                
                 }
-                else if (res.status != 200) {
-                    var json = await res.json();
-                    setErrorMessage(json["message"])
-                    display_error_message();
-                    return
-                }
-
-                var json = await res.json();
-            
-                setCurrentTemplates(json["templates"]);
-
-                setBoolToUpdatePage(!boolToUpdatePage)
             }
 
             fetchCurrentTemplates()
@@ -107,7 +113,7 @@ function Templates (){
                 </thead>
                 <tbody>
                     {
-                        current_templates.length == 0 ?
+                        current_templates.length === 0 ?
                             <tr>
                                 <th style={{textAlgin:"center"}}>No templates available</th> 
                                 <td></td>

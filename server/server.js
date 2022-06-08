@@ -28,10 +28,10 @@ const swaggerUi = require("swagger-ui-express")
 const swaggerOptions = {
   swaggerDefinition: {
     info: {
-      title: "MathGames API",
-      description: "MathGames Server REST API",
+      title: "Document Generator API",
+      description: "Document Generator Server REST API",
       contact: {
-        name: "MathGames"
+        name: "Document Generator"
       },
       servers: ["http://localhost:4000"]
     }
@@ -48,5 +48,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 
 require("./app/routes/templates.routes.js")(app);
+require("./app/routes/document.routes.js")(app);
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
