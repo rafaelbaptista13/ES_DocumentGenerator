@@ -181,12 +181,11 @@ async function populatePptx(file_uid, template_path, json){
 
 
 		const doc = new Docxtemplater(zip, {
-			delimiters: { start: '${', end: '}' },
+			delimiters: { start: '{', end: '}' },
 			
 		})
 
 
-	
 		doc.modules.forEach(function (module) {
 			if (module.name === "LoopModule") {
 				module.prefix.start = "#";
@@ -195,8 +194,10 @@ async function populatePptx(file_uid, template_path, json){
 		});
 		
 		// populate document
+
+		console.log(json[Object.keys(json)[0]][0]);
 	
-		doc.render(json[0])
+		doc.render(json[Object.keys(json)[0]][0]);
 
 	
 		const buf = doc.getZip().generate({
@@ -218,13 +219,13 @@ async function populatePptx(file_uid, template_path, json){
 		}
 	
 		s3.upload(params, (err) => {
-		if (err) {
-			res.status(500).send({
-				message: "An error occurred while uploading the template! Please try again."
-			});
-		}	
-			console.log("Upload file with success .");
-		})
+			if (err) {
+				console.log("Upload error!");
+				return;
+			}	
+				console.log("Upload file with success .");
+			})
+		
 	
 
 		// get document url
@@ -298,9 +299,8 @@ async function  populateDocx(file_uid, template_path, json){
 
 	s3.upload(params, (err) => {
 	if (err) {
-		res.status(500).send({
-			message: "An error occurred while uploading the template! Please try again."
-		});
+		console.log("Upload error!");
+		return;
 	}	
 		console.log("Upload file with success .");
 	})
