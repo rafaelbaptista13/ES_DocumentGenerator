@@ -1,13 +1,15 @@
 const s3 = require("../config/bucketconfig");
 const fs = require("fs");
 const PizZip = require("pizzip");
-const Docxtemplater = require("docxtemplater");
+const Docxtemplater = require("docxtemplater-lastest");
+const Docxtemplater_pptx = require("docxtemplater");
 const htmlDocx = require("html-docx-js");
 const process = require('process');
 
 const path = require("path");
 const uuid = require("uuid");
 const XlsxPopulate = require("xlsx-populate");
+const pptxTemplaterModule = require('pptxtemplater')
 
 // Generate a document
 exports.generate = async (req, res) => {
@@ -179,25 +181,20 @@ async function populatePptx(file_uid, template_path, json){
 	
 		// define delimiters
 
-
-		const doc = new Docxtemplater(zip, {
-			delimiters: { start: '{', end: '}' },
-			
-		})
-
-
-		doc.modules.forEach(function (module) {
-			if (module.name === "LoopModule") {
-				module.prefix.start = "#";
-				module.prefix.start = "/";
-			}
-		});
-		
-		// populate document
-
-		console.log(json[Object.keys(json)[0]][0]);
 	
-		doc.render(json[Object.keys(json)[0]][0]);
+		// const doc = new Docxtemplater(zip, {
+		// 	delimiters: { start: '{', end: '}' },
+		// 	 modules: [pptxTemplaterModule],
+
+		// })
+
+		let doc = new Docxtemplater_pptx(zip);
+		doc.attachModule(pptxTemplaterModule);
+		doc.templatedFiles = doc.fileTypeConfig.getTemplatedFiles(doc.zip);
+		doc.setData(json);
+		doc.setOptions({ fileType: "pptx" });
+	
+		doc.render();
 
 	
 		const buf = doc.getZip().generate({
