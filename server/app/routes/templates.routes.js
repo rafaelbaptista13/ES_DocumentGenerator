@@ -12,6 +12,12 @@ module.exports = (app) => {
 	 * @swagger
 	 * /api/templates/:
 	 *  post:
+	 *    parameters:
+	 *    - in: formData
+	 *      name: file
+	 *      type: file
+	 *      required: true
+	 *      description: Template file to upload.
 	 *    description: Upload a new template
 	 *    responses:
 	 *      '201':
@@ -42,6 +48,12 @@ module.exports = (app) => {
 	 * @swagger
 	 * /api/templates/:id:
 	 *  delete:
+	 *    parameters:
+	 *    - in: path
+	 *      name: id
+	 *      type: integer
+	 *      required: true
+	 *      description: id of template to delete
 	 *    description: Delete a template by name
 	 *    responses:
 	 *      '200':

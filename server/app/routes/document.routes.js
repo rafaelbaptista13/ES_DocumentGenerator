@@ -25,6 +25,19 @@ module.exports = (app) => {
 	 * @swagger
 	 * /api/documents/:
 	 *  post:
+	 *    parameters:
+	 *    - in: body
+	 *      name: template_name
+	 *      type: string
+	 *      required: true
+	 *      description: Name of template to use for generation
+	 *    - in: formData
+	 *      name: jsonfile
+	 *      type: file
+	 *      consumes:
+	 *        - application/json
+	 *      required: true
+	 *      description: JSON file that fills the template.
 	 *    description: Generate a document from a template and a JSON file
 	 *    responses:
 	 *      '200':
