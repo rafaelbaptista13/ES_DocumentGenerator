@@ -10,7 +10,7 @@ module.exports = (app) => {
 
 	/**
 	 * @swagger
-	 * /api/templates/upload:
+	 * /api/templates/:
 	 *  post:
 	 *    description: Upload a new template
 	 *    responses:
@@ -22,7 +22,7 @@ module.exports = (app) => {
 	 *         description: An internal error has occoured.
 	 */
 
-	router.post("/upload", upload.single("file"), templates.uploadTemplate);
+	router.post("/", upload.single("file"), templates.uploadTemplate);
 
 	/**
 	 * @swagger

@@ -21,7 +21,7 @@ class TemplateService {
         let formData = new FormData()
         formData.append('file', file)
         
-        var url = urlAPI + '/templates/upload';
+        var url = urlAPI + '/templates/';
 
         try {
             var res = await fetch(url, {
