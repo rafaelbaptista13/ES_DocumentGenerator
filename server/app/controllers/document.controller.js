@@ -103,9 +103,9 @@ exports.generate = async (req, res) => {
 		case 'docx':
 
 			file_uid = uuid.v1() + ".docx";
-			try{
+			try {
 				downloadURL =  await populateDocx( file_uid, template_path, json); // populate word document
-			}catch(err){
+			} catch(err) {
 				res.status(406).send({
 					message: ` ${err.properties.errors[0]} . `
 				});
@@ -158,6 +158,8 @@ exports.generate = async (req, res) => {
 
 	return;
 };
+
+
 
 
 /**
@@ -317,6 +319,8 @@ async function  populateDocx(file_uid, template_path, json){
 
 	return downloadURL;
 }
+
+
 
 /**
  * Populate a excel document with a given json data.
